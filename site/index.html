@@ -99,6 +99,23 @@
   @keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
   @media (prefers-reduced-motion:reduce){.marquee .track{animation:none}}
 
+  /* LIVE STATS BAR */
+  .livebar-wrap{background:linear-gradient(180deg,#0c0a20,var(--abyss));border-bottom:1px solid var(--line)}
+  .livebar{display:flex;align-items:center;gap:22px;padding:18px 22px;flex-wrap:wrap}
+  .live-badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-poster);
+    text-transform:uppercase;letter-spacing:.12em;font-size:13px;color:var(--muted2)}
+  .live-badge .dot{width:9px;height:9px;border-radius:50%;background:var(--muted2)}
+  .live-badge.on{color:var(--good)}
+  .live-badge.on .dot{background:var(--good);box-shadow:0 0 0 0 rgba(74,222,128,.6);animation:pulse 1.8s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.5)}70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+  @media(prefers-reduced-motion:reduce){.live-badge.on .dot{animation:none}}
+  .lstat{display:flex;flex-direction:column;gap:2px;min-width:96px}
+  .lstat .lv{font-family:var(--font-poster);font-size:22px;color:var(--foam);
+    font-variant-numeric:tabular-nums;line-height:1}
+  .lstat .ll{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.1em}
+  .live-src{margin-left:auto;font-family:var(--font-mono);font-size:12px;color:var(--violet-bright)}
+  .live-src:hover{color:var(--orange)}
+
   /* SECTION SHELL */
   section{position:relative}
   .band{padding:90px 0}
@@ -225,7 +242,7 @@
       <a href="#monanimals">Monanimals</a>
     </div>
     <div class="nav-cta">
-      <a class="btn btn-primary" href="#buy">Buy $SALMONAD</a>
+      <a class="btn btn-primary" href="https://nad.fun/tokens/0x0a917fCC0799E43d0232780aA359aA0D389d7777" target="_blank" rel="noopener">Buy $SALMONAD</a>
     </div>
   </nav>
 </header>
@@ -239,11 +256,11 @@
     <h1>The river belongs to <span class="grad">$Salmonad</span></h1>
     <p class="sub">The purple fish with orange lips — the superior meme on Monad. One school, one mission: swim up, win together. Community owned. No VC. No insiders. Just the school.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="#buy">Buy $SALMONAD</a>
+      <a class="btn btn-primary" href="https://nad.fun/tokens/0x0a917fCC0799E43d0232780aA359aA0D389d7777" target="_blank" rel="noopener">Buy $SALMONAD</a>
       <a class="btn btn-ghost" href="#lore">Read the Lore</a>
     </div>
     <div class="ca">
-      <div class="ca-box"><b>CA</b><span id="caText">paste-your-contract-address-here</span></div>
+      <div class="ca-box"><b>CA</b><span id="caText">0x0a917fCC0799E43d0232780aA359aA0D389d7777</span></div>
       <button class="copy" id="copyBtn" type="button">Copy</button>
     </div>
   </div>
@@ -255,6 +272,17 @@
     <span>Swim upstream</span>·<b>The river is ours</b>·<span>Community owned</span>·<b>No VC</b>·<span>No insiders</span>·<b>Just the school</b>·<span>Oldest timestamp OG</span>·<b>Purple fish, orange lips</b>·
   </div>
 </div>
+
+<section class="livebar-wrap" aria-label="Live $SALMONAD token stats from nad.fun">
+  <div class="wrap livebar">
+    <div class="live-badge" id="liveBadge"><span class="dot"></span> Live</div>
+    <div class="lstat"><div class="lv" id="lvPrice">—</div><div class="ll">Price (USD)</div></div>
+    <div class="lstat"><div class="lv" id="lvMcap">—</div><div class="ll">Market Cap</div></div>
+    <div class="lstat"><div class="lv" id="lvHolders">—</div><div class="ll">Holders</div></div>
+    <div class="lstat"><div class="lv" id="lvMon">—</div><div class="ll">Price (MON)</div></div>
+    <a class="live-src" href="https://nad.fun/tokens/0x0a917fCC0799E43d0232780aA359aA0D389d7777" target="_blank" rel="noopener">via nad.fun ↗</a>
+  </div>
+</section>
 
 <section class="band" id="lore">
   <div class="wrap">
@@ -382,14 +410,15 @@
       <p>Four strokes and you're swimming with the OG. Always confirm the contract address from the official channels before you ape.</p>
     </div>
     <div class="steps">
-      <div class="step"><h4>Get a wallet</h4><p>Install a Monad-compatible wallet (like MetaMask) and add the Monad network.</p></div>
-      <div class="step"><h4>Fund it</h4><p>Bridge or buy MON for gas and to swap into $SALMONAD.</p></div>
-      <div class="step"><h4>Swap</h4><p>Paste the official $SALMONAD contract into your DEX and swap. Double-check the CA.</p></div>
-      <div class="step"><h4>Hold &amp; school up</h4><p>Diamond fins. Post the fish, swim upstream, and win together.</p></div>
+      <div class="step"><h4>Get a Monad wallet</h4><p>Install a Monad-compatible wallet (like MetaMask) and add the Monad network.</p></div>
+      <div class="step"><h4>Fund it with MON</h4><p>Get some MON for gas and for your buy. That's your bait.</p></div>
+      <div class="step"><h4>Open on nad.fun</h4><p>Hit the button below to open $SALMONAD on nad.fun. The CA is pre-loaded — always double-check it.</p></div>
+      <div class="step"><h4>Buy &amp; school up</h4><p>Ape in, diamond fins. Post the fish, swim upstream, win together.</p></div>
     </div>
     <div class="ca" style="margin-top:26px">
-      <div class="ca-box"><b>Official CA</b><span>paste-your-contract-address-here</span></div>
-      <span style="color:var(--muted2);font-size:13px">← drop your real contract address in the source before you ship</span>
+      <a class="btn btn-primary" href="https://nad.fun/tokens/0x0a917fCC0799E43d0232780aA359aA0D389d7777" target="_blank" rel="noopener">Buy on nad.fun ↗</a>
+      <div class="ca-box"><b>CA</b><span id="caText2">0x0a917fCC0799E43d0232780aA359aA0D389d7777</span></div>
+      <button class="copy" id="copyBtn2" type="button">Copy</button>
     </div>
   </div>
 </section>
@@ -415,13 +444,42 @@
 </footer>
 
 <script>
-  // Copy CA
-  var btn=document.getElementById('copyBtn');
-  if(btn){btn.addEventListener('click',function(){
-    var t=document.getElementById('caText').textContent;
-    navigator.clipboard&&navigator.clipboard.writeText(t);
-    var o=btn.textContent;btn.textContent='Copied';setTimeout(function(){btn.textContent=o;},1400);
-  });}
+  // Copy CA (both buttons)
+  function wireCopy(bId,tId){var b=document.getElementById(bId);if(!b)return;
+    b.addEventListener('click',function(){var t=document.getElementById(tId).textContent;
+      navigator.clipboard&&navigator.clipboard.writeText(t);
+      var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o;},1400);});}
+  wireCopy('copyBtn','caText'); wireCopy('copyBtn2','caText2');
+
+  // Live $SALMONAD stats from nad.fun
+  (function(){
+    var CA="0x0a917fCC0799E43d0232780aA359aA0D389d7777";
+    var API="https://api.nad.fun/trade/market/"+CA;
+    function set(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+    function usd(p){p=Number(p);if(!isFinite(p)||p<=0)return"—";
+      if(p<0.001)return"$"+p.toPrecision(3);
+      if(p<1)return"$"+p.toFixed(4);
+      return"$"+p.toLocaleString(undefined,{maximumFractionDigits:2});}
+    function compact(n){n=Number(n);if(!isFinite(n)||n<=0)return"—";
+      if(n>=1e9)return"$"+(n/1e9).toFixed(2)+"B";
+      if(n>=1e6)return"$"+(n/1e6).toFixed(2)+"M";
+      if(n>=1e3)return"$"+(n/1e3).toFixed(1)+"K";
+      return"$"+n.toFixed(0);}
+    function refresh(){
+      fetch(API,{headers:{accept:"application/json"}}).then(function(r){
+        if(!r.ok)throw 0;return r.json();}).then(function(j){
+        var m=j.market_info||j;
+        var price=parseFloat(m.price_usd);
+        var supply=parseFloat(m.total_supply)/1e18;
+        set('lvPrice',usd(price));
+        set('lvMcap',compact(price*supply));
+        set('lvHolders',m.holder_count!=null?Number(m.holder_count).toLocaleString():'—');
+        set('lvMon',m.price_native?parseFloat(m.price_native).toPrecision(3)+' MON':'—');
+        var b=document.getElementById('liveBadge');if(b)b.classList.add('on');
+      }).catch(function(){/* offline / sandboxed preview: keep dashes */});
+    }
+    refresh();setInterval(refresh,20000);
+  })();
 
   // Ambient bubbles + light rays on hero canvas
   (function(){
