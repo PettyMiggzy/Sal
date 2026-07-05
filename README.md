@@ -26,10 +26,27 @@ Glossy 3D Pixar-style Salmonad, for Telegram.
 | `salmonad_3d_wave_tg512.webp` / `.png` | 512×512 Telegram-sized (static). |
 | `salmonad_3d_celebrate_tg512.webp` / `.png` | 512×512 Telegram-sized (static). |
 
-## Next / pending
+## Promo video (`assets/salmonad/video/`)
 
-- **Promo video** (image-to-video) — Salmonad animated leaping/splashing the MONAD whales.
-- **Animated Telegram stickers** — the two 3D stickers above, animated to TG spec (512×512, WEBM/VP9, ≤3s, no audio).
+| File | Description |
+|------|-------------|
+| `salmonad_promo.mp4` | 8s promo — Salmonad leaps and splashes the MONAD whales. 1440×1440, with audio. |
+| `salmonad_promo_preview.gif` | Lightweight looping GIF preview. |
 
-Both are **blocked on Venice video credits** (video generation requires more balance than the
-account currently has). Once credits are topped up at https://venice.ai/settings/api, these render.
+## Animated Telegram stickers (`assets/salmonad/stickers_3d/animated/`)
+
+Ready to upload to @Stickers on Telegram (512×512, VP9 WEBM, 3s, no audio, <256KB).
+
+| File | Description |
+|------|-------------|
+| `salmonad_wave_tg512.webm` | Animated wave sticker — **TG-ready** (154KB). |
+| `salmonad_celebrate_tg512.webm` | Animated celebrate sticker — **TG-ready** (176KB). |
+| `salmonad_wave.mp4` / `salmonad_celebrate.mp4` | Source clips (4s, with audio). |
+| `*_preview.gif` | Looping GIF previews. |
+
+### Uploading to Telegram
+1. Open [@Stickers](https://t.me/stickers) → `/newpack` (video sticker pack).
+2. Send the `*_tg512.webm` files.
+3. Assign an emoji to each and `/publish`.
+
+Generated with Venice AI — Nano Banana Pro (identity-locked stills) + Seedance 2.0 (image-to-video).
