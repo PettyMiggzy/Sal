@@ -365,7 +365,7 @@ dashBtnEl.addEventListener('touchcancel',dbOff);
 dashBtnEl.addEventListener('mousedown',dbOn);
 window.addEventListener('mouseup',dbOff);
 window.addEventListener('touchstart',function(){touchDevice=true;},{passive:true,capture:true});
-function DZ(v){var s=v<0?-1:1,a=Math.abs(v);a=(a-0.14)/0.86;if(a<0)a=0;return s*a*a;}
+function DZ(v){var s=v<0?-1:1,a=Math.abs(v);a=(a-0.10)/0.90;if(a<0)a=0;return s*a*(0.4+0.6*a);}
 
 /* eat particles */
 var pooForce=[];
@@ -397,8 +397,8 @@ function frame(){
     var aiming = touchDevice ? steerHeld : true;
     var nx=(scr.rx-ccx)/ccx, ny=(scr.ry-ccy)/ccy;
     var sx=aiming?DZ(nx):0, sy=aiming?DZ(ny):0;
-    targYaw   -= sx*dt*2.0;
-    targPitch -= sy*dt*1.55;
+    targYaw   -= sx*dt*2.7;
+    targPitch -= sy*dt*2.05;
     targPitch += (-targPitch)*dt*0.5;               // gentle auto-level toward flat
     targPitch=Math.max(-1.05,Math.min(1.05,targPitch));
 
@@ -420,8 +420,8 @@ function frame(){
       targPitch += (tPitch-targPitch)*k;
     }
 
-    yaw   += (targYaw-yaw)*Math.min(1,dt*7);
-    pitch += (targPitch-pitch)*Math.min(1,dt*7);
+    yaw   += (targYaw-yaw)*Math.min(1,dt*9);
+    pitch += (targPitch-pitch)*Math.min(1,dt*9);
     var dir=new T.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
     dashing = spaceHeld||dashBtnHeld||(mouseHeld&&!touchDevice);
 
@@ -475,7 +475,7 @@ function frame(){
       var baitPos=new T.Vector3(hk.position.x,hk.position.y+hk.userData.baitY,hk.position.z);
       var hd=baitPos.distanceTo(player.position);
       if(hd>170){scene.remove(hk);hooks.splice(hi,1);continue;}
-      if(invuln<=0 && hd < prH+0.9){
+      if(invuln<=0 && hd < prH+0.5){
         if(mass>1.8){ mass=1; invuln=1.8; pop(baitPos,0xffffff,16); flashWarn('SNAPPED! back to shrimp',0xF87171); scene.remove(hk); hooks.splice(hi,1); updHud(); }
         else { gameOver('hook'); return; }
       }
@@ -517,8 +517,8 @@ function frame(){
       }
       // recycle if far
       if(d>150){scene.remove(o.mesh);npcs.splice(i,1);continue;}
-      // collision (forgiving)
-      var hit=pr+o.size+0.9;
+      // collision — tight, proportional grace so eating feels accurate (not a vacuum)
+      var hit=pr+o.size+Math.min(0.5,pr*0.18);
       if(d < hit){
         if(o.mass < mass*0.92){
           // eat
