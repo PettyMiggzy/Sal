@@ -145,7 +145,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer.setClearColor(0x0a1a3a,1);
 var scene=new T.Scene();
 var SHALLOW=new T.Color(0x2a86c8), DEEP=new T.Color(0x070826);
-scene.fog=new T.FogExp2(0x123a6a,0.014);
+scene.fog=new T.FogExp2(0x123a6a,0.008);
 var camera=new T.PerspectiveCamera(62,1,0.1,600);
 camera.position.set(0,4,16);
 
@@ -173,11 +173,27 @@ for(var r=0;r<70;r++){
   rock.position.set((Math.random()-.5)*700,-70+2,(Math.random()-.5)*700); scene.add(rock);
 }
 /* corals for color */
-for(var cc=0;cc<40;cc++){
+for(var cc=0;cc<48;cc++){
   var col=new T.Color().setHSL(Math.random(),0.7,0.55);
-  var coral=new T.Mesh(new T.IcosahedronGeometry(1.4+Math.random()*2.4,0),
+  var coral=new T.Mesh(new T.IcosahedronGeometry(1.6+Math.random()*3,0),
     new T.MeshStandardMaterial({color:col,roughness:.8,flatShading:true}));
-  coral.position.set((Math.random()-.5)*600,-68+Math.random()*3,(Math.random()-.5)*600); scene.add(coral);
+  coral.position.set((Math.random()-.5)*620,-68+Math.random()*3,(Math.random()-.5)*620); scene.add(coral);
+}
+/* tall coral towers rising into the swim zone */
+for(var tw=0;tw<30;tw++){
+  var th=22+Math.random()*44;
+  var tower=new T.Mesh(new T.ConeGeometry(2.2+Math.random()*3.5,th,6),
+    new T.MeshStandardMaterial({color:new T.Color().setHSL(Math.random(),0.65,0.5),roughness:.85,flatShading:true}));
+  tower.position.set((Math.random()-.5)*640,-72+th/2,(Math.random()-.5)*640); scene.add(tower);
+}
+/* swaying kelp strands */
+var kelps=[];
+for(var kk=0;kk<46;kk++){
+  var kh=26+Math.random()*40;
+  var kelp=new T.Mesh(new T.CylinderGeometry(0.18,0.5,kh,5),
+    new T.MeshStandardMaterial({color:new T.Color().setHSL(0.3+Math.random()*0.12,0.6,0.32+Math.random()*0.12),roughness:1,flatShading:true}));
+  kelp.position.set((Math.random()-.5)*620,-72+kh/2,(Math.random()-.5)*620);
+  kelp.userData.ph=Math.random()*6.28; kelp.userData.base=kelp.rotation.z; scene.add(kelp); kelps.push(kelp);
 }
 
 /* bubbles / motes */
@@ -240,6 +256,22 @@ function makeWhale(){
   var fr=fl.clone(); fr.rotation.set(0,-0.4,-Math.PI/2.1); fr.position.x=1.15; f.add(fr);
   f.add(eye(-0.85,0.36,1.7,0.24)); f.add(eye(0.85,0.36,1.7,0.24));
   f.userData.whale=true;
+  return f;
+}
+// shark (threat) — sleek grey with a tall signature dorsal fin
+function makeShark(){
+  var f=new T.Group();
+  var bm=new T.MeshStandardMaterial({color:0x8792a3,roughness:.5});
+  var bel=new T.MeshStandardMaterial({color:0xd8dfe8,roughness:.5});
+  var body=new T.Mesh(new T.SphereGeometry(1,22,16),bm); body.scale.set(0.6,0.72,2.0); f.add(body);
+  var belly=new T.Mesh(new T.SphereGeometry(0.97,16,12),bel); belly.scale.set(0.5,0.42,1.75); belly.position.y=-0.3; f.add(belly);
+  var snout=new T.Mesh(new T.SphereGeometry(0.62,16,12),bm); snout.scale.set(0.85,0.8,1.1); snout.position.z=1.55; f.add(snout);
+  var dor=new T.Mesh(new T.ConeGeometry(0.55,1.5,3),bm); dor.scale.set(0.24,1,1.0); dor.rotation.x=-0.15; dor.position.set(0,0.82,-0.1); f.add(dor);
+  var tail=new T.Group(); var tf=new T.Mesh(new T.ConeGeometry(0.6,1.6,3),bm); tf.scale.set(0.22,1,1); tf.position.set(0,0.2,0); tail.add(tf); tail.position.set(0,0.1,-2.1); f.add(tail); f.userData.tail=tail;
+  var pL=new T.Mesh(new T.ConeGeometry(0.42,1.0,3),bm); pL.rotation.set(0.2,0.4,Math.PI/2); pL.scale.set(1,1,0.18); pL.position.set(-0.6,-0.25,0.5); f.add(pL);
+  var pR=pL.clone(); pR.rotation.set(0.2,-0.4,-Math.PI/2); pR.position.x=0.6; f.add(pR);
+  f.add(eye(-0.32,0.22,1.35,0.15)); f.add(eye(0.32,0.22,1.35,0.15));
+  f.userData.shark=true;
   return f;
 }
 // fishing hook (hazard): line from the surface + hook + glowing bait
@@ -306,26 +338,25 @@ function prevTierMass(m){var p=1;for(var i=0;i<TIERS.length;i++){if(m>=TIERS[i][
 /* spawn one npc relative to player size */
 var FISH_COLORS=[0xff7043,0xffca28,0x26c6da,0xef5350,0x66bb6a,0xffa726,0xec407a,0x42a5f5,0xab47bc];
 function spawnNpc(far){
-  var whale = Math.random()<0.13 && mass>4;
-  var f, size, m;
-  if(whale){ f=makeWhale(); m=mass*(1.6+Math.random()*3.2); size=Math.cbrt(m)*1.3; }
-  else{
-    f=makeFish(FISH_COLORS[(Math.random()*FISH_COLORS.length)|0]);
-    // bias toward edible, some threats
-    var roll=Math.random();
-    if(roll<0.68) m=mass*(0.12+Math.random()*0.6);        // food
-    else if(roll<0.88) m=mass*(0.6+Math.random()*0.7);     // near size
-    else m=mass*(1.15+Math.random()*1.6);                  // threat
-    size=Math.cbrt(m)*1.05;
+  var f, size, m, kind='fish';
+  var roll=Math.random();
+  if(roll<0.50){ // food — scales to you
+    f=makeFish(FISH_COLORS[(Math.random()*FISH_COLORS.length)|0]); m=mass*(0.12+Math.random()*0.55); size=Math.cbrt(m)*1.05;
+  } else if(roll<0.66){ // near size
+    f=makeFish(FISH_COLORS[(Math.random()*FISH_COLORS.length)|0]); m=mass*(0.6+Math.random()*0.7); size=Math.cbrt(m)*1.05;
+  } else if(roll<0.85){ // SHARK — always a real threat, absolute floor so it looms early
+    kind='shark'; f=makeShark(); m=Math.max(mass*1.05, 5+Math.random()*13); size=Math.cbrt(m)*1.12;
+  } else { // WHALE — big roamer, absolute floor so you always see giants
+    kind='whale'; f=makeWhale(); m=Math.max(mass*1.4, 16+Math.random()*48); size=Math.cbrt(m)*1.28;
   }
   f.scale.setScalar(size);
-  // place in a shell around player
-  var dir=new T.Vector3(Math.random()-.5,(Math.random()-.5)*0.6,Math.random()-.5).normalize();
-  var dist=(far?70:35)+Math.random()*60;
+  var big=(kind!=='fish');
+  var dir=new T.Vector3(Math.random()-.5,(Math.random()-.5)*0.5,Math.random()-.5).normalize();
+  var dist=(far?70:35)+Math.random()*(big?95:60);
   f.position.copy(player.position).addScaledVector(dir,dist);
-  f.position.y=Math.max(-60,Math.min(30,f.position.y));
-  var vel=new T.Vector3((Math.random()-.5),(Math.random()-.5)*0.4,(Math.random()-.5)).normalize().multiplyScalar(2+Math.random()*3);
-  var o={mesh:f,mass:m,size:size,vel:vel,whale:!!whale,wig:Math.random()*10};
+  f.position.y=Math.max(-60,Math.min(28,f.position.y));
+  var vel=new T.Vector3((Math.random()-.5),(Math.random()-.5)*0.35,(Math.random()-.5)).normalize().multiplyScalar((big?1.4:2)+Math.random()*(big?2:3));
+  var o={mesh:f,mass:m,size:size,vel:vel,whale:kind==='whale',shark:kind==='shark',kind:kind,wig:Math.random()*10};
   npcs.push(o); scene.add(f);
   return o;
 }
@@ -384,6 +415,7 @@ function frame(){
   requestAnimationFrame(frame);
   var dt=Math.min(clock.getDelta(),0.05);
   motes.rotation.y+=dt*0.01;
+  for(var ks=0;ks<kelps.length;ks++){kelps[ks].rotation.z=Math.sin(clock.elapsedTime*0.6+kelps[ks].userData.ph)*0.12;}
   // depth color grade
   var depthT=Math.max(0,Math.min(1,(-player.position.y+10)/70));
   scene.fog.color.copy(SHALLOW).lerp(DEEP,depthT); renderer.setClearColor(scene.fog.color,1);
@@ -515,21 +547,23 @@ function frame(){
         var away=o.mesh.position.clone().sub(player.position).normalize();
         o.vel.addScaledVector(away,dt*8).clampLength(1,6);
       }
-      // recycle if far
-      if(d>150){scene.remove(o.mesh);npcs.splice(i,1);continue;}
+      // recycle if far (big roamers persist longer so giants stay visible)
+      if(d>(o.kind!=='fish'?210:150)){scene.remove(o.mesh);npcs.splice(i,1);continue;}
       // collision — tight, proportional grace so eating feels accurate (not a vacuum)
       var hit=pr+o.size+Math.min(0.5,pr*0.18);
       if(d < hit){
         if(o.mass < mass*0.92){
           // eat
           mass+=o.mass*0.55;
-          pop(o.mesh.position,o.whale?0x8fb8f0:o.mesh.children[0].material.color.getHex(),o.whale?26:10);
+          var pc=o.whale?0x8fb8f0:(o.shark?0x9aa7b8:o.mesh.children[0].material.color.getHex());
+          pop(o.mesh.position,pc,o.kind!=='fish'?24:10);
           scene.remove(o.mesh); npcs.splice(i,1);
           updHud();
           if(o.whale) flashWarn('WHALE DOWN',0x4ADE80);
+          else if(o.shark) flashWarn('SHARK DOWN',0x4ADE80);
           continue;
         } else if(o.mass > mass*1.12 && invuln<=0){
-          gameOver(o.whale);
+          gameOver(o.whale?true:(o.shark?'shark':false));
           return;
         }
         // similar size: bump, no eat
@@ -587,6 +621,7 @@ function gameOver(reason){
   else if(reason==='hook') msg='A <b>fishing hook</b> reeled you in. Gone.';
   else if(reason==='net') msg='You drifted too <b>shallow</b> and hit a <b>net</b>. Caught.';
   else if(reason===true) msg='A <b>MONAD whale</b> swallowed you whole.';
+  else if(reason==='shark') msg='A <b>shark</b> made you its lunch.';
   else msg='A bigger fish got you. Swim smarter.';
   el('overMsg').innerHTML=msg;
   el('hud').classList.add('hidden'); el('over').classList.remove('hidden');
