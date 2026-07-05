@@ -188,65 +188,106 @@ var motes=new T.Points(mg,new T.PointsMaterial({color:0xbfe0ff,size:0.5,transpar
 scene.add(motes);
 
 /* ---------- fish builders ---------- */
-function eye(x){
-  var g=new T.Group();
-  var w=new T.Mesh(new T.SphereGeometry(0.5,16,16),new T.MeshStandardMaterial({color:0xfff8f0,roughness:.4}));
-  var pu=new T.Mesh(new T.SphereGeometry(0.24,12,12),new T.MeshStandardMaterial({color:0x111111,roughness:.3}));
-  pu.position.set(0.12,0.05,0.42); g.add(w); g.add(pu); g.position.set(x,0.55,0.85); return g;
+function eye(x,y,z,r){
+  r=r||0.44; var g=new T.Group();
+  var w=new T.Mesh(new T.SphereGeometry(r,18,16),new T.MeshStandardMaterial({color:0xfff8f0,roughness:.32}));
+  var pu=new T.Mesh(new T.SphereGeometry(r*0.5,12,12),new T.MeshStandardMaterial({color:0x111111,roughness:.22}));
+  pu.position.set(0,0.05,r*0.8); g.add(w); g.add(pu); g.position.set(x,y,z); return g;
 }
-// The player: stylized Salmonad
+// The player: stylized Salmonad — reads as a fish from behind & above
 function makeSalmonad(){
   var f=new T.Group();
-  var bodyMat=new T.MeshStandardMaterial({color:0x7B3FCB,roughness:.55,flatShading:false});
-  var finMat=new T.MeshStandardMaterial({color:0xB4632F,roughness:.7,flatShading:true});
-  var body=new T.Mesh(new T.SphereGeometry(1,24,20),bodyMat);
-  body.scale.set(1.0,1.15,2.1); f.add(body);
-  // snout
-  var snout=new T.Mesh(new T.SphereGeometry(0.72,20,16),bodyMat); snout.scale.set(1,1.05,1.2); snout.position.set(0,0.05,1.5); f.add(snout);
-  // lips
-  var lips=new T.Mesh(new T.BoxGeometry(1.05,0.32,0.9),finMat); lips.position.set(0,-0.05,2.05); f.add(lips);
-  // eyes
-  f.add(eye(-0.5)); f.add(eye(0.5));
-  // dorsal fin
-  var dorsal=new T.Mesh(new T.ConeGeometry(0.55,1.5,4),finMat); dorsal.rotation.x=Math.PI; dorsal.position.set(0,1.35,-0.1); dorsal.scale.set(0.5,1,1.7); f.add(dorsal);
-  // tail
+  var bodyMat=new T.MeshStandardMaterial({color:0x7B3FCB,roughness:.48});
+  var bellyMat=new T.MeshStandardMaterial({color:0xa066e8,roughness:.5});
+  var finMat=new T.MeshStandardMaterial({color:0xC0672F,roughness:.62,flatShading:true,side:T.DoubleSide});
+  var body=new T.Mesh(new T.SphereGeometry(1,26,20),bodyMat); body.scale.set(0.82,0.94,1.75); f.add(body);
+  var belly=new T.Mesh(new T.SphereGeometry(0.98,22,16),bellyMat); belly.scale.set(0.78,0.55,1.6); belly.position.y=-0.24; f.add(belly);
+  var peduncle=new T.Mesh(new T.SphereGeometry(0.5,16,12),bodyMat); peduncle.scale.set(0.66,0.68,1.15); peduncle.position.z=-1.4; f.add(peduncle);
+  var head=new T.Mesh(new T.SphereGeometry(0.8,22,18),bodyMat); head.scale.set(0.92,0.9,0.86); head.position.z=1.05; f.add(head);
   var tail=new T.Group();
-  var tf=new T.Mesh(new T.ConeGeometry(1.1,1.6,3),finMat); tf.rotation.x=-Math.PI/2; tf.rotation.z=Math.PI; tf.scale.set(1,1,0.5); tail.add(tf); tail.position.set(0,0.1,-2.1); f.add(tail);
-  f.userData.tail=tail;
-  // side fins
-  var sfL=new T.Mesh(new T.ConeGeometry(0.4,1.1,3),finMat); sfL.rotation.z=Math.PI/2.2; sfL.position.set(-1,-0.3,0.4); f.add(sfL);
-  var sfR=sfL.clone(); sfR.rotation.z=-Math.PI/2.2; sfR.position.x=1; f.add(sfR);
+  var tf=new T.Mesh(new T.ConeGeometry(1.05,1.5,3),finMat); tf.rotation.x=-Math.PI/2; tf.rotation.z=Math.PI; tf.scale.set(1.18,1,0.2); tail.add(tf);
+  tail.position.set(0,0.05,-2.0); f.add(tail); f.userData.tail=tail;
+  var dorsal=new T.Mesh(new T.ConeGeometry(0.5,1.35,3),finMat); dorsal.scale.set(0.3,1,1.4); dorsal.position.set(0,0.74,-0.2); f.add(dorsal);
+  var sfL=new T.Mesh(new T.ConeGeometry(0.42,1.05,3),finMat); sfL.rotation.set(0,0.4,Math.PI/2.1); sfL.scale.set(1,1,0.32); sfL.position.set(-0.72,-0.2,0.45); f.add(sfL);
+  var sfR=sfL.clone(); sfR.rotation.set(0,-0.4,-Math.PI/2.1); sfR.position.x=0.72; f.add(sfR);
+  f.add(eye(-0.42,0.44,1.2,0.42)); f.add(eye(0.42,0.44,1.2,0.42));
+  var lips=new T.Mesh(new T.BoxGeometry(0.7,0.22,0.5),finMat); lips.position.set(0,-0.02,1.78); f.add(lips);
   return f;
 }
-// generic food fish
+// generic food fish — varied shape (round / long) + colors
 function makeFish(color){
-  var f=new T.Group();
-  var bm=new T.MeshStandardMaterial({color:color,roughness:.6,flatShading:true});
-  var fm=new T.MeshStandardMaterial({color:new T.Color(color).offsetHSL(0,-0.1,-0.12),roughness:.7,flatShading:true});
-  var body=new T.Mesh(new T.SphereGeometry(1,14,12),bm); body.scale.set(1,1.1,1.9); f.add(body);
-  var tail=new T.Mesh(new T.ConeGeometry(0.9,1.3,3),fm); tail.rotation.x=-Math.PI/2; tail.rotation.z=Math.PI; tail.scale.set(1,1,0.5); tail.position.set(0,0.1,-1.9); f.add(tail); f.userData.tail=tail;
-  var e1=new T.Mesh(new T.SphereGeometry(0.28,8,8),new T.MeshStandardMaterial({color:0xffffff})); e1.position.set(-0.42,0.4,1.1); f.add(e1);
-  var e2=e1.clone(); e2.position.x=0.42; f.add(e2);
+  var f=new T.Group(); var longish=Math.random()<0.5;
+  var bm=new T.MeshStandardMaterial({color:color,roughness:.5});
+  var fm=new T.MeshStandardMaterial({color:new T.Color(color).offsetHSL(0,-.05,-.14),roughness:.68,flatShading:true,side:T.DoubleSide});
+  var body=new T.Mesh(new T.SphereGeometry(1,18,14),bm);
+  if(longish)body.scale.set(0.56,0.66,1.55); else body.scale.set(0.72,0.98,1.0);
+  f.add(body);
+  var tail=new T.Group(); var tf=new T.Mesh(new T.ConeGeometry(0.72,1.0,3),fm); tf.rotation.x=-Math.PI/2; tf.rotation.z=Math.PI; tf.scale.set(1.1,1,0.2); tail.add(tf); tail.position.set(0,0.05,longish?-1.5:-1.0); f.add(tail); f.userData.tail=tail;
+  var dor=new T.Mesh(new T.ConeGeometry(0.34,0.6,3),fm); dor.scale.set(0.3,1,1); dor.position.set(0,0.58,0); f.add(dor);
+  f.add(eye(-0.3,0.32,longish?0.95:0.68,0.24)); f.add(eye(0.3,0.32,longish?0.95:0.68,0.24));
   return f;
 }
 // whale (threat)
 function makeWhale(){
   var f=new T.Group();
-  var bm=new T.MeshStandardMaterial({color:0x8fb8f0,roughness:.5,transparent:true,opacity:0.92,flatShading:false});
-  var body=new T.Mesh(new T.SphereGeometry(1,24,18),bm); body.scale.set(1.2,1.25,2.4); f.add(body);
-  var tail=new T.Mesh(new T.ConeGeometry(1.6,1.8,3),bm); tail.rotation.x=-Math.PI/2; tail.rotation.z=Math.PI; tail.scale.set(1,1,0.4); tail.position.set(0,0.2,-2.5); f.add(tail); f.userData.tail=tail;
-  var e1=new T.Mesh(new T.SphereGeometry(0.22,8,8),new T.MeshStandardMaterial({color:0x0a1830})); e1.position.set(-0.9,0.3,1.8); f.add(e1);
-  var e2=e1.clone(); e2.position.x=0.9; f.add(e2);
+  var bm=new T.MeshStandardMaterial({color:0x8fb8f0,roughness:.42,transparent:true,opacity:0.95});
+  var bel=new T.MeshStandardMaterial({color:0xdaeeff,roughness:.5});
+  var body=new T.Mesh(new T.SphereGeometry(1,26,20),bm); body.scale.set(1.1,1.05,2.4); f.add(body);
+  var belly=new T.Mesh(new T.SphereGeometry(0.97,22,16),bel); belly.scale.set(1.0,0.55,2.2); belly.position.y=-0.44; f.add(belly);
+  var head=new T.Mesh(new T.SphereGeometry(0.95,20,16),bm); head.scale.set(1.0,0.96,1.0); head.position.z=1.4; f.add(head);
+  var tail=new T.Group(); var tf=new T.Mesh(new T.ConeGeometry(1.5,1.7,3),bm); tf.rotation.x=-Math.PI/2; tf.rotation.z=Math.PI; tf.scale.set(1.3,1,0.18); tail.add(tf); tail.position.set(0,0.15,-2.5); f.add(tail); f.userData.tail=tail;
+  var fl=new T.Mesh(new T.ConeGeometry(0.72,1.2,3),bm); fl.rotation.set(0,0.4,Math.PI/2.1); fl.scale.set(1,1,0.3); fl.position.set(-1.15,-0.35,0.5); f.add(fl);
+  var fr=fl.clone(); fr.rotation.set(0,-0.4,-Math.PI/2.1); fr.position.x=1.15; f.add(fr);
+  f.add(eye(-0.85,0.36,1.7,0.24)); f.add(eye(0.85,0.36,1.7,0.24));
   f.userData.whale=true;
   return f;
 }
+// fishing hook (hazard): line from the surface + hook + glowing bait
+function makeHook(){
+  var g=new T.Group();
+  var line=new T.Mesh(new T.CylinderGeometry(0.06,0.06,80,6),new T.MeshBasicMaterial({color:0xe8f0ff,transparent:true,opacity:0.45,depthWrite:false}));
+  line.position.y=40; g.add(line);
+  var hook=new T.Mesh(new T.TorusGeometry(0.55,0.13,8,14,Math.PI*1.55),new T.MeshStandardMaterial({color:0xd8d8e0,metalness:.85,roughness:.3}));
+  hook.rotation.set(Math.PI/2,0,0.3); hook.position.y=-0.2; g.add(hook);
+  var bait=new T.Mesh(new T.SphereGeometry(0.4,12,12),new T.MeshStandardMaterial({color:0xff5a33,emissive:0x611500,emissiveIntensity:.7,roughness:.5}));
+  bait.position.y=-0.85; g.add(bait);
+  g.userData.baitY=-0.85;
+  return g;
+}
+function spawnHook(){
+  var g=makeHook();
+  var ang=Math.random()*6.283, dist=40+Math.random()*90;
+  g.position.set(player.position.x+Math.cos(ang)*dist,-8-Math.random()*34,player.position.z+Math.sin(ang)*dist);
+  g.userData.bob=Math.random()*10; g.userData.baseY=g.position.y;
+  hooks.push(g); scene.add(g); return g;
+}
+function clearHooks(){for(var i=0;i<hooks.length;i++)scene.remove(hooks[i]);hooks=[];}
+// fishnet (hazard): drifts near the surface — don't get too shallow
+function makeNet(){
+  var g=new T.Group(), S=28;
+  var plane=new T.Mesh(new T.PlaneGeometry(S,S),new T.MeshBasicMaterial({color:0x9fe0ff,transparent:true,opacity:0.09,side:T.DoubleSide,depthWrite:false}));
+  plane.rotation.x=-Math.PI/2; g.add(plane);
+  var grid=new T.GridHelper(S,18,0xd6ecff,0xbfe0ff); grid.material.transparent=true; grid.material.opacity=0.5; grid.material.depthWrite=false; g.add(grid);
+  var buoyMat=new T.MeshStandardMaterial({color:0xff6a33,roughness:.6});
+  for(var k=0;k<4;k++){var bo=new T.Mesh(new T.SphereGeometry(0.65,10,10),buoyMat);var a=k*Math.PI/2;bo.position.set(Math.cos(a)*S*0.5,0.3,Math.sin(a)*S*0.5);g.add(bo);}
+  g.userData.half=S*0.5; return g;
+}
+function spawnNet(){
+  var g=makeNet(); var ang=Math.random()*6.283, dist=34+Math.random()*80;
+  g.position.set(player.position.x+Math.cos(ang)*dist, 22+Math.random()*5, player.position.z+Math.sin(ang)*dist);
+  g.userData.vel=new T.Vector3((Math.random()-.5),0,(Math.random()-.5)).multiplyScalar(1.4);
+  nets.push(g); scene.add(g); return g;
+}
+function clearNets(){for(var i=0;i<nets.length;i++)scene.remove(nets[i]);nets=[];}
 
 /* ---------- game state ---------- */
 var player=makeSalmonad(); scene.add(player);
 var yaw=0,pitch=0, targYaw=0,targPitch=0;
 var mass=1, best=parseInt(localStorage.getItem('sal_best')||'0',10);
 var running=false, gameTime=0;
-var npcs=[]; var MAXN=48;
+var npcs=[]; var MAXN=72;
+var hooks=[], MAXHOOK=8, invuln=0;
+var nets=[], MAXNET=3;
 var dashing=false;
 var WORLD=180; // soft bounds radius
 var TESTMODE=/[?&]test=1/.test(location.search), testT=0;
@@ -350,6 +391,7 @@ function frame(){
 
   if(running){
     gameTime+=dt;
+    if(invuln>0){invuln-=dt; player.visible=(Math.floor(gameTime*12)%2===0);} else player.visible=true;
     // steering: reticle offset -> target yaw/pitch (deadzone + auto-level)
     var iw=window.innerWidth, ih=window.innerHeight, ccx=iw/2, ccy=ih/2;
     var aiming = touchDevice ? steerHeld : true;
@@ -414,15 +456,42 @@ function frame(){
     // tail wiggle
     if(player.userData.tail) player.userData.tail.rotation.y=Math.sin(gameTime*(dashing?18:9))*0.4;
 
-    // camera chase
-    var back=dir.clone().multiplyScalar(-(9+playerRadius()*3.2));
-    var camTarget=player.position.clone().add(back); camTarget.y+=3+playerRadius()*1.2;
+    // camera: dorsal 3/4 chase (behind & above so you see the fish)
+    var back=dir.clone().multiplyScalar(-(8.5+playerRadius()*3.0));
+    var camTarget=player.position.clone().add(back); camTarget.y+=5.5+playerRadius()*2.2;
     camera.position.lerp(camTarget,Math.min(1,dt*4));
-    camera.lookAt(player.position.clone().addScaledVector(dir,4));
+    camera.lookAt(player.position.x, player.position.y-0.6, player.position.z+dir.z*3);
     camera.fov += ((dashing?70:62)-camera.fov)*Math.min(1,dt*5); camera.updateProjectionMatrix();
 
     // maintain population
     while(npcs.length<MAXN) spawnNpc(true);
+
+    // fishing hooks: hit = yanked back to original size; hit while original = caught
+    while(hooks.length<MAXHOOK) spawnHook();
+    var prH=playerRadius();
+    for(var hi=hooks.length-1;hi>=0;hi--){
+      var hk=hooks[hi]; hk.userData.bob+=dt;
+      hk.position.y=hk.userData.baseY+Math.sin(hk.userData.bob*1.3)*1.6;
+      var baitPos=new T.Vector3(hk.position.x,hk.position.y+hk.userData.baitY,hk.position.z);
+      var hd=baitPos.distanceTo(player.position);
+      if(hd>170){scene.remove(hk);hooks.splice(hi,1);continue;}
+      if(invuln<=0 && hd < prH+0.9){
+        if(mass>1.8){ mass=1; invuln=1.8; pop(baitPos,0xffffff,16); flashWarn('SNAPPED! back to shrimp',0xF87171); scene.remove(hk); hooks.splice(hi,1); updHud(); }
+        else { gameOver('hook'); return; }
+      }
+    }
+
+    // fishnets drifting in the shallows — too high = caught
+    while(nets.length<MAXNET) spawnNet();
+    for(var ni=nets.length-1;ni>=0;ni--){
+      var nt=nets[ni]; nt.position.addScaledVector(nt.userData.vel,dt);
+      var fx=player.position.x-nt.position.x, fz=player.position.z-nt.position.z;
+      if(Math.hypot(fx,fz)>170){scene.remove(nt);nets.splice(ni,1);continue;}
+      if(invuln<=0 && Math.abs(player.position.y-nt.position.y)<2.4 && Math.abs(fx)<nt.userData.half && Math.abs(fz)<nt.userData.half){
+        if(mass>1.8){ mass=1; invuln=1.8; player.position.y-=5; targPitch=Math.max(targPitch,0.35); pop(player.position.clone(),0xffffff,16); flashWarn('NET! dive deeper',0xF87171); updHud(); }
+        else { gameOver('net'); return; }
+      }
+    }
 
     // test hook (?test=1): nudge a small fish in front to verify eating
     if(TESTMODE){testT+=dt; if(testT>0.4){testT=0; for(var ti=0;ti<npcs.length;ti++){if(npcs[ti].mass<mass*0.8){npcs[ti].mesh.position.copy(player.position).addScaledVector(dir,playerRadius()*0.3);break;}}}}
@@ -459,7 +528,7 @@ function frame(){
           updHud();
           if(o.whale) flashWarn('WHALE DOWN',0x4ADE80);
           continue;
-        } else if(o.mass > mass*1.12){
+        } else if(o.mass > mass*1.12 && invuln<=0){
           gameOver(o.whale);
           return;
         }
@@ -502,20 +571,24 @@ function flashWarn(txt,color){
 
 /* ---------- flow ---------- */
 function startGame(){
-  mass=1; gameTime=0; yaw=0;pitch=0;targYaw=0;targPitch=0;
+  mass=1; gameTime=0; yaw=0;pitch=0;targYaw=0;targPitch=0; invuln=0; player.visible=true;
   player.position.set(0,0,0); player.rotation.set(0,0,0); player.scale.setScalar(1);
-  clearNpcs(); for(var i=0;i<MAXN;i++)spawnNpc(true);
+  clearNpcs(); clearHooks(); clearNets(); for(var i=0;i<MAXN;i++)spawnNpc(true);
   el('start').classList.add('hidden'); el('over').classList.add('hidden'); el('hud').classList.remove('hidden');
   updHud(); running=true;
 }
-function gameOver(byWhale){
-  running=false;
+function gameOver(reason){
+  running=false; player.visible=true;
   el('finalSize').textContent=Math.floor(mass); el('finalBest').textContent=best;
   var whaled=tierName(mass).indexOf('WHALE')>=0;
-  el('overTitle').textContent= whaled?'Absolute Whale':'Chomped';
-  el('overMsg').innerHTML= whaled
-    ? 'You ate the ocean and became a <b>WHALE</b>. The river bows.'
-    : (byWhale?'A <b>MONAD whale</b> swallowed you whole.':'A bigger fish got you. Swim smarter.');
+  el('overTitle').textContent= whaled?'Absolute Whale':((reason==='hook'||reason==='net')?'Caught!':'Chomped');
+  var msg;
+  if(whaled) msg='You ate the ocean and became a <b>WHALE</b>. The river bows.';
+  else if(reason==='hook') msg='A <b>fishing hook</b> reeled you in. Gone.';
+  else if(reason==='net') msg='You drifted too <b>shallow</b> and hit a <b>net</b>. Caught.';
+  else if(reason===true) msg='A <b>MONAD whale</b> swallowed you whole.';
+  else msg='A bigger fish got you. Swim smarter.';
+  el('overMsg').innerHTML=msg;
   el('hud').classList.add('hidden'); el('over').classList.remove('hidden');
   el('dashBtn').classList.add('hidden');
 }
