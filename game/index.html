@@ -32,9 +32,30 @@
     background:rgba(255,255,255,.10);overflow:hidden;border:1px solid rgba(131,110,249,.35)}
   #bar{height:100%;width:0%;background:linear-gradient(90deg,var(--purple),var(--orange));transition:width .18s}
   #depth{position:absolute;bottom:34px;left:18px;font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
-  #warn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--poster);
-    font-size:clamp(40px,10vw,90px);color:var(--bad);opacity:0;text-shadow:0 0 30px rgba(248,113,113,.6);
+  #warn{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);font-family:var(--poster);
+    font-size:clamp(34px,8vw,72px);color:var(--bad);opacity:0;text-shadow:0 0 30px rgba(248,113,113,.6);
     transition:opacity .15s}
+  /* aim reticle + markers */
+  #centerMark{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%);
+    opacity:.45;pointer-events:none}
+  #centerMark::before,#centerMark::after{content:"";position:absolute;background:rgba(234,230,255,.7)}
+  #centerMark::before{left:50%;top:0;width:2px;height:100%;transform:translateX(-50%)}
+  #centerMark::after{top:50%;left:0;height:2px;width:100%;transform:translateY(-50%)}
+  #reticle{position:absolute;left:50%;top:50%;width:60px;height:60px;transform:translate(-50%,-50%);
+    border:2.5px solid rgba(240,147,43,.95);border-radius:50%;opacity:0;pointer-events:none;
+    box-shadow:0 0 16px rgba(240,147,43,.55),inset 0 0 10px rgba(240,147,43,.3);transition:opacity .18s}
+  #reticle span{position:absolute;left:50%;top:50%;width:16px;height:2.5px;background:rgba(240,147,43,.95);border-radius:2px}
+  #reticle span:nth-child(1){transform:translate(-50%,-50%) rotate(45deg)}
+  #reticle span:nth-child(2){transform:translate(-50%,-50%) rotate(-45deg)}
+  #lockRing{position:absolute;left:50%;top:50%;width:70px;height:70px;transform:translate(-50%,-50%);
+    border:3px solid var(--good);border-radius:14px;opacity:0;pointer-events:none;
+    box-shadow:0 0 20px rgba(74,222,128,.6);transition:opacity .12s}
+  #lockRing.threat{border-color:var(--bad);box-shadow:0 0 20px rgba(248,113,113,.6)}
+  #dashBtn{position:fixed;right:22px;bottom:64px;width:96px;height:96px;border-radius:50%;z-index:12;
+    background:radial-gradient(circle at 50% 40%,rgba(240,147,43,.95),rgba(232,135,58,.75));
+    border:2px solid rgba(255,255,255,.45);color:#241207;font-family:var(--poster);font-size:22px;
+    letter-spacing:.05em;pointer-events:auto;touch-action:none;box-shadow:0 10px 26px rgba(240,147,43,.5)}
+  #dashBtn:active{transform:scale(.92)}
 
   /* panels */
   .screen{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;
@@ -75,7 +96,11 @@
   <div id="depth">Depth 0m</div>
   <div id="barWrap"><div id="bar"></div></div>
   <div id="warn">!</div>
+  <div id="centerMark"></div>
+  <div id="reticle"><span></span><span></span></div>
+  <div id="lockRing"></div>
 </div>
+<button id="dashBtn" class="hidden" aria-label="Dash">DASH</button>
 
 <div id="start" class="screen">
   <div class="card">
@@ -222,9 +247,12 @@ var yaw=0,pitch=0, targYaw=0,targPitch=0;
 var mass=1, best=parseInt(localStorage.getItem('sal_best')||'0',10);
 var running=false, gameTime=0;
 var npcs=[]; var MAXN=48;
-var pointer={x:0,y:0,down:false}, dashing=false;
+var dashing=false;
 var WORLD=180; // soft bounds radius
 var TESTMODE=/[?&]test=1/.test(location.search), testT=0;
+// input
+var scr={rx:window.innerWidth/2, ry:window.innerHeight/2};
+var touchDevice=false, steerHeld=false, mouseHeld=false, spaceHeld=false, dashBtnHeld=false;
 
 function playerRadius(){return Math.cbrt(mass)*1.1;}
 function playerScale(){return Math.cbrt(mass);}
@@ -274,15 +302,29 @@ function updHud(){
 }
 
 /* ---------- input ---------- */
-function setPointer(cx,cy){pointer.x=(cx/window.innerWidth)*2-1; pointer.y=(cy/window.innerHeight)*2-1;}
-window.addEventListener('mousemove',function(e){setPointer(e.clientX,e.clientY);});
-window.addEventListener('mousedown',function(e){pointer.down=true;});
-window.addEventListener('mouseup',function(){pointer.down=false;});
-window.addEventListener('touchstart',function(e){pointer.down=true;if(e.touches[0])setPointer(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
-window.addEventListener('touchmove',function(e){if(e.touches[0])setPointer(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
-window.addEventListener('touchend',function(){pointer.down=false;},{passive:true});
-window.addEventListener('keydown',function(e){if(e.code==='Space'){pointer.down=true;e.preventDefault();}});
-window.addEventListener('keyup',function(e){if(e.code==='Space')pointer.down=false;});
+// desktop: mouse steers (always), hold button / Space dashes
+window.addEventListener('mousemove',function(e){scr.rx=e.clientX;scr.ry=e.clientY;});
+canvas.addEventListener('mousedown',function(){mouseHeld=true;});
+window.addEventListener('mouseup',function(){mouseHeld=false;});
+window.addEventListener('keydown',function(e){if(e.code==='Space'){spaceHeld=true;e.preventDefault();}});
+window.addEventListener('keyup',function(e){if(e.code==='Space')spaceHeld=false;});
+// touch: drag anywhere on canvas to steer, release to go straight; DASH button dashes
+function tset(e){var t=e.touches[0];if(t){scr.rx=t.clientX;scr.ry=t.clientY;}}
+canvas.addEventListener('touchstart',function(e){touchDevice=true;steerHeld=true;tset(e);},{passive:true});
+canvas.addEventListener('touchmove',function(e){tset(e);},{passive:true});
+canvas.addEventListener('touchend',function(){steerHeld=false;},{passive:true});
+canvas.addEventListener('touchcancel',function(){steerHeld=false;},{passive:true});
+// dash button (touch + mouse)
+var dashBtnEl=el('dashBtn');
+function dbOn(e){dashBtnHeld=true;if(e.cancelable)e.preventDefault();}
+function dbOff(){dashBtnHeld=false;}
+dashBtnEl.addEventListener('touchstart',dbOn,{passive:false});
+dashBtnEl.addEventListener('touchend',dbOff);
+dashBtnEl.addEventListener('touchcancel',dbOff);
+dashBtnEl.addEventListener('mousedown',dbOn);
+window.addEventListener('mouseup',dbOff);
+window.addEventListener('touchstart',function(){touchDevice=true;},{passive:true,capture:true});
+function DZ(v){var s=v<0?-1:1,a=Math.abs(v);a=(a-0.14)/0.86;if(a<0)a=0;return s*a*a;}
 
 /* eat particles */
 var pooForce=[];
@@ -308,19 +350,50 @@ function frame(){
 
   if(running){
     gameTime+=dt;
-    // steering: pointer offset -> target yaw/pitch
-    targYaw   -= pointer.x*dt*2.2;
-    targPitch -= pointer.y*dt*1.7;
+    // steering: reticle offset -> target yaw/pitch (deadzone + auto-level)
+    var iw=window.innerWidth, ih=window.innerHeight, ccx=iw/2, ccy=ih/2;
+    var aiming = touchDevice ? steerHeld : true;
+    var nx=(scr.rx-ccx)/ccx, ny=(scr.ry-ccy)/ccy;
+    var sx=aiming?DZ(nx):0, sy=aiming?DZ(ny):0;
+    targYaw   -= sx*dt*2.0;
+    targPitch -= sy*dt*1.55;
+    targPitch += (-targPitch)*dt*0.5;               // gentle auto-level toward flat
     targPitch=Math.max(-1.05,Math.min(1.05,targPitch));
-    yaw   += (targYaw-yaw)*Math.min(1,dt*6);
-    pitch += (targPitch-pitch)*Math.min(1,dt*6);
 
-    var dir=new T.Vector3(
-      Math.sin(yaw)*Math.cos(pitch),
-      Math.sin(pitch),
-      Math.cos(yaw)*Math.cos(pitch)
-    );
-    dashing=pointer.down;
+    // aim assist: nearest edible fish near the reticle -> magnetism + lock ring
+    var lockObj=null, lockPx=null, lockThreat=false, bestScore=1e9;
+    for(var ai=0;ai<npcs.length;ai++){
+      var oo=npcs[ai];
+      var sp=oo.mesh.position.clone().project(camera);
+      if(sp.z>1) continue;                            // behind camera
+      var px=(sp.x*0.5+0.5)*iw, py=(-sp.y*0.5+0.5)*ih;
+      var dd=Math.hypot(px-scr.rx,py-scr.ry);
+      if(dd<150 && dd<bestScore){bestScore=dd;lockObj=oo;lockPx=[px,py];lockThreat=!(oo.mass<mass*0.92);}
+    }
+    if(lockObj && !lockThreat){
+      var toT=lockObj.mesh.position.clone().sub(player.position).normalize();
+      var tYaw=Math.atan2(toT.x,toT.z), tPitch=Math.asin(Math.max(-1,Math.min(1,toT.y)));
+      var k=Math.min(1,dt*3.0)*(1-bestScore/150)*0.9;
+      targYaw   += Math.atan2(Math.sin(tYaw-targYaw),Math.cos(tYaw-targYaw))*k;
+      targPitch += (tPitch-targPitch)*k;
+    }
+
+    yaw   += (targYaw-yaw)*Math.min(1,dt*7);
+    pitch += (targPitch-pitch)*Math.min(1,dt*7);
+    var dir=new T.Vector3(Math.sin(yaw)*Math.cos(pitch),Math.sin(pitch),Math.cos(yaw)*Math.cos(pitch));
+    dashing = spaceHeld||dashBtnHeld||(mouseHeld&&!touchDevice);
+
+    // reticle + lock DOM
+    var ret=el('reticle');
+    ret.style.opacity=aiming?'1':'0'; ret.style.left=scr.rx+'px'; ret.style.top=scr.ry+'px';
+    var lr=el('lockRing');
+    if(lockObj && bestScore<150){
+      var dist=camera.position.distanceTo(lockObj.mesh.position);
+      var sz=Math.max(44,Math.min(130,2200*lockObj.size/dist));
+      lr.style.opacity='1'; lr.style.left=lockPx[0]+'px'; lr.style.top=lockPx[1]+'px';
+      lr.style.width=sz+'px'; lr.style.height=sz+'px'; lr.classList.toggle('threat',lockThreat);
+    } else lr.style.opacity='0';
+    if(touchDevice) el('dashBtn').classList.remove('hidden');
     var baseSpd=14+Math.min(mass*0.04,10);
     var spd=baseSpd*(dashing?1.9:1);
     player.position.addScaledVector(dir,spd*dt);
@@ -444,6 +517,7 @@ function gameOver(byWhale){
     ? 'You ate the ocean and became a <b>WHALE</b>. The river bows.'
     : (byWhale?'A <b>MONAD whale</b> swallowed you whole.':'A bigger fish got you. Swim smarter.');
   el('hud').classList.add('hidden'); el('over').classList.remove('hidden');
+  el('dashBtn').classList.add('hidden');
 }
 el('playBtn').onclick=startGame;
 el('againBtn').onclick=startGame;
