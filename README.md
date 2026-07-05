@@ -1,52 +1,50 @@
-# Salmonad — Monad promo assets
+# $SALMONAD
 
-Promo artwork for **Salmonad**, one of the Monad Monanimals — the purple salmon
-with big googly eyes, long brown lips, and a spiky dorsal fin.
+The purple salmon of Monad — the OG by timestamp. Community site, sticker packs, and two 3D games.
 
-## Hero stills (`assets/salmonad/`)
+**Live:** https://salmonad.vercel.app (→ salmonad.net)
+**Token:** [$SALMONAD on nad.fun](https://nad.fun/tokens/0x0a917fCC0799E43d0232780aA359aA0D389d7777)
+`CA: 0x0a917fCC0799E43d0232780aA359aA0D389d7777`
+**Socials:** [X](https://x.com/Salmonads) · [Telegram](https://t.me/salmonads) · admin@salmonad.net
 
-| File | Description |
-|------|-------------|
-| `salmonad_hero_clean_4k.png` | 4K hero — Salmonad splashing the "MONAD" whales (no title). Best base for video. |
-| `salmonad_hero_banner_4k.png` | 4K hero with "SALMONAD: THE MONAD HERO!" banner. Good as a poster. |
-| `salmonad_hero_clean_preview.jpg` | Lightweight preview of the clean hero. |
-| `salmonad_hero_banner_preview.jpg` | Lightweight preview of the banner hero. |
-| `salmonad_canonical_reference.png` | Original canonical Salmonad meme (by mondalf, 2023) used as the on-model reference. |
+---
 
-Generated with Venice AI (Nano Banana Pro edit) using the canonical Salmonad as the identity reference.
+## What's here
 
-## 3D stickers (`assets/salmonad/stickers_3d/`)
+| Path | What it is |
+|------|-----------|
+| `index.html` | The landing site (self-contained: all images inlined as base64). Served at `/`. |
+| `game/` | **Game v1 — "Shrimp to Whale"**: stylized 3D free-swim eat-to-grow. `/game` |
+| `game2/` | **Game v2 — "CGI Ocean"**: same game with CGI creature sprites. `/game2` |
+| `game/three.min.js` | Vendored Three.js r137 (shared by both games; no CDN). |
+| `game2/creatures/` | 9 transparent CGI creature textures (clownfish → whale + player). |
+| `assets/salmonad/` | Source art — see below. |
+| `vercel.json` | Static hosting config (`cleanUrls`). |
 
-Glossy 3D Pixar-style Salmonad, for Telegram.
+## Games
+Both are single-player, **no wallet**, self-contained. Eat fish smaller than you to grow through
+tiers (Shrimp → … → Whale); dodge anything bigger — the **MONAD whales**. Steer with mouse/finger,
+hold click / Space / the on-screen button to dash. Aim reticle + green lock-ring show what you can eat.
+Append `?test=1` to auto-feed for testing. Not linked in the site nav yet.
 
-| File | Description |
-|------|-------------|
-| `salmonad_3d_wave_2k.png` | 3D Salmonad friendly wave (2K). |
-| `salmonad_3d_celebrate_2k.png` | 3D Salmonad celebrating with confetti + splash (2K). |
-| `salmonad_3d_wave_tg512.webp` / `.png` | 512×512 Telegram-sized (static). |
-| `salmonad_3d_celebrate_tg512.webp` / `.png` | 512×512 Telegram-sized (static). |
+## Site features
+- Live **nad.fun** price / market cap / holders (client-side fetch, no key)
+- OG-timestamp lore (the Salmonad-CTO rug), CGI Monanimals lineup, meme gallery
+- Custom Salmonad cursor + favicon; buy buttons link to nad.fun (no wallet-connect)
 
-## Promo video (`assets/salmonad/video/`)
+## `assets/salmonad/`
+`cgi/` cinematic renders · `monanimals/` CGI Monanimal cast · `stickers_2d/` `stickers_cgi/`
+`stickers_3d/` `stickers_transparent/` Telegram sticker packs (animated `.webm` + static `.png`) ·
+`video/` promo clip · plus hero stills and the canonical reference.
 
-| File | Description |
-|------|-------------|
-| `salmonad_promo.mp4` | 8s promo — Salmonad leaps and splashes the MONAD whales. 1440×1440, with audio. |
-| `salmonad_promo_preview.gif` | Lightweight looping GIF preview. |
+## Notes
+Source PNGs/MP4s are full-resolution (the repo is media-heavy by design so the raw deliverables
+live with the project). The live site does **not** load these — it embeds optimized copies inline.
 
-## Animated Telegram stickers (`assets/salmonad/stickers_3d/animated/`)
+---
 
-Ready to upload to @Stickers on Telegram (512×512, VP9 WEBM, 3s, no audio, <256KB).
-
-| File | Description |
-|------|-------------|
-| `salmonad_wave_tg512.webm` | Animated wave sticker — **TG-ready** (154KB). |
-| `salmonad_celebrate_tg512.webm` | Animated celebrate sticker — **TG-ready** (176KB). |
-| `salmonad_wave.mp4` / `salmonad_celebrate.mp4` | Source clips (4s, with audio). |
-| `*_preview.gif` | Looping GIF previews. |
-
-### Uploading to Telegram
-1. Open [@Stickers](https://t.me/stickers) → `/newpack` (video sticker pack).
-2. Send the `*_tg512.webm` files.
-3. Assign an emoji to each and `/publish`.
-
-Generated with Venice AI — Nano Banana Pro (identity-locked stills) + Seedance 2.0 (image-to-video).
+### Disclaimer
+$SALMONAD is a community meme project and cultural tribute inspired by the Monad "Monanimals."
+It is **not affiliated with, endorsed by, or officially connected to** Monad, its team, or its
+founders. "Keone's favorite token" is community folklore/satire. Nothing here is financial advice;
+memecoins are high-risk. Always verify the official contract address yourself.
