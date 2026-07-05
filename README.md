@@ -15,6 +15,21 @@ with big googly eyes, long brown lips, and a spiky dorsal fin.
 
 Generated with Venice AI (Nano Banana Pro edit) using the canonical Salmonad as the identity reference.
 
-## Next
+## 3D stickers (`assets/salmonad/stickers_3d/`)
 
-Promo video (image-to-video) — Salmonad animated leaping/splashing the MONAD whales.
+Glossy 3D Pixar-style Salmonad, for Telegram.
+
+| File | Description |
+|------|-------------|
+| `salmonad_3d_wave_2k.png` | 3D Salmonad friendly wave (2K). |
+| `salmonad_3d_celebrate_2k.png` | 3D Salmonad celebrating with confetti + splash (2K). |
+| `salmonad_3d_wave_tg512.webp` / `.png` | 512×512 Telegram-sized (static). |
+| `salmonad_3d_celebrate_tg512.webp` / `.png` | 512×512 Telegram-sized (static). |
+
+## Next / pending
+
+- **Promo video** (image-to-video) — Salmonad animated leaping/splashing the MONAD whales.
+- **Animated Telegram stickers** — the two 3D stickers above, animated to TG spec (512×512, WEBM/VP9, ≤3s, no audio).
+
+Both are **blocked on Venice video credits** (video generation requires more balance than the
+account currently has). Once credits are topped up at https://venice.ai/settings/api, these render.
