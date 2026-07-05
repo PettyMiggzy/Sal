@@ -14,10 +14,9 @@ The purple salmon of Monad — the OG by timestamp. Community site, sticker pack
 | Path | What it is |
 |------|-----------|
 | `index.html` | The landing site (self-contained: all images inlined as base64). Served at `/`. |
-| `game/` | **Game v1 — "Shrimp to Whale"**: stylized 3D free-swim eat-to-grow. `/game` |
-| `game2/` | **Game v2 — "CGI Ocean"**: same game with CGI creature sprites. `/game2` |
-| `game/three.min.js` | Vendored Three.js r137 (shared by both games; no CDN). |
-| `game2/creatures/` | 9 transparent CGI creature textures (clownfish → whale + player). |
+| `game/` | **Shrimp to Whale** — 3D free-swim eat-to-grow with realistic creature sprites. `/game` |
+| `game/three.min.js` | Vendored Three.js r137 (no CDN). |
+| `game/creatures/` | Transparent realistic creature textures (sardine → whale + Salmonad player). |
 | `assets/salmonad/` | Source art — see below. |
 | `vercel.json` | Static hosting config (`cleanUrls`). |
 

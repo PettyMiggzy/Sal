@@ -106,7 +106,7 @@
   <div class="card">
     <h1>Shrimp to Whale</h1>
     <div class="sub">You're <b>Salmonad</b>. Eat fish smaller than you to grow. Dodge anything bigger — especially the <b>MONAD whales</b>. Grow big enough and <b>you eat the whales.</b></div>
-    <button class="btn" id="playBtn">Dive in</button>
+    <button class="btn" id="playBtn" disabled>Loading…</button>
     <div class="hint">
       <b style="color:var(--foam)">Steer:</b> move mouse / drag finger &nbsp;·&nbsp;
       <b style="color:var(--foam)">Dash:</b> hold click / <kbd>Space</kbd><br>
@@ -203,77 +203,19 @@ var mg=new T.BufferGeometry(); mg.setAttribute('position',new T.BufferAttribute(
 var motes=new T.Points(mg,new T.PointsMaterial({color:0xbfe0ff,size:0.5,transparent:true,opacity:0.5,depthWrite:false}));
 scene.add(motes);
 
-/* ---------- fish builders ---------- */
-function eye(x,y,z,r){
-  r=r||0.44; var g=new T.Group();
-  var w=new T.Mesh(new T.SphereGeometry(r,18,16),new T.MeshStandardMaterial({color:0xfff8f0,roughness:.32}));
-  var pu=new T.Mesh(new T.SphereGeometry(r*0.5,12,12),new T.MeshStandardMaterial({color:0x111111,roughness:.22}));
-  pu.position.set(0,0.05,r*0.8); g.add(w); g.add(pu); g.position.set(x,y,z); return g;
-}
-// The player: stylized Salmonad — reads as a fish from behind & above
-function makeSalmonad(){
-  var f=new T.Group();
-  var bodyMat=new T.MeshStandardMaterial({color:0x7B3FCB,roughness:.48});
-  var bellyMat=new T.MeshStandardMaterial({color:0xa066e8,roughness:.5});
-  var finMat=new T.MeshStandardMaterial({color:0xC0672F,roughness:.62,flatShading:true,side:T.DoubleSide});
-  var body=new T.Mesh(new T.SphereGeometry(1,26,20),bodyMat); body.scale.set(0.82,0.94,1.75); f.add(body);
-  var belly=new T.Mesh(new T.SphereGeometry(0.98,22,16),bellyMat); belly.scale.set(0.78,0.55,1.6); belly.position.y=-0.24; f.add(belly);
-  var peduncle=new T.Mesh(new T.SphereGeometry(0.5,16,12),bodyMat); peduncle.scale.set(0.66,0.68,1.15); peduncle.position.z=-1.4; f.add(peduncle);
-  var head=new T.Mesh(new T.SphereGeometry(0.8,22,18),bodyMat); head.scale.set(0.92,0.9,0.86); head.position.z=1.05; f.add(head);
-  var tail=new T.Group();
-  var tf=new T.Mesh(new T.ConeGeometry(1.05,1.5,3),finMat); tf.rotation.x=-Math.PI/2; tf.rotation.z=Math.PI; tf.scale.set(1.18,1,0.2); tail.add(tf);
-  tail.position.set(0,0.05,-2.0); f.add(tail); f.userData.tail=tail;
-  var dorsal=new T.Mesh(new T.ConeGeometry(0.5,1.35,3),finMat); dorsal.scale.set(0.3,1,1.4); dorsal.position.set(0,0.74,-0.2); f.add(dorsal);
-  var sfL=new T.Mesh(new T.ConeGeometry(0.42,1.05,3),finMat); sfL.rotation.set(0,0.4,Math.PI/2.1); sfL.scale.set(1,1,0.32); sfL.position.set(-0.72,-0.2,0.45); f.add(sfL);
-  var sfR=sfL.clone(); sfR.rotation.set(0,-0.4,-Math.PI/2.1); sfR.position.x=0.72; f.add(sfR);
-  f.add(eye(-0.42,0.44,1.2,0.42)); f.add(eye(0.42,0.44,1.2,0.42));
-  var lips=new T.Mesh(new T.BoxGeometry(0.7,0.22,0.5),finMat); lips.position.set(0,-0.02,1.78); f.add(lips);
-  return f;
-}
-// generic food fish — varied shape (round / long) + colors
-function makeFish(color){
-  var f=new T.Group(); var longish=Math.random()<0.5;
-  var bm=new T.MeshStandardMaterial({color:color,roughness:.5});
-  var fm=new T.MeshStandardMaterial({color:new T.Color(color).offsetHSL(0,-.05,-.14),roughness:.68,flatShading:true,side:T.DoubleSide});
-  var body=new T.Mesh(new T.SphereGeometry(1,18,14),bm);
-  if(longish)body.scale.set(0.56,0.66,1.55); else body.scale.set(0.72,0.98,1.0);
-  f.add(body);
-  var tail=new T.Group(); var tf=new T.Mesh(new T.ConeGeometry(0.72,1.0,3),fm); tf.rotation.x=-Math.PI/2; tf.rotation.z=Math.PI; tf.scale.set(1.1,1,0.2); tail.add(tf); tail.position.set(0,0.05,longish?-1.5:-1.0); f.add(tail); f.userData.tail=tail;
-  var dor=new T.Mesh(new T.ConeGeometry(0.34,0.6,3),fm); dor.scale.set(0.3,1,1); dor.position.set(0,0.58,0); f.add(dor);
-  f.add(eye(-0.3,0.32,longish?0.95:0.68,0.24)); f.add(eye(0.3,0.32,longish?0.95:0.68,0.24));
-  return f;
-}
-// whale (threat)
-function makeWhale(){
-  var f=new T.Group();
-  var bm=new T.MeshStandardMaterial({color:0x8fb8f0,roughness:.42,transparent:true,opacity:0.95});
-  var bel=new T.MeshStandardMaterial({color:0xdaeeff,roughness:.5});
-  var body=new T.Mesh(new T.SphereGeometry(1,26,20),bm); body.scale.set(1.1,1.05,2.4); f.add(body);
-  var belly=new T.Mesh(new T.SphereGeometry(0.97,22,16),bel); belly.scale.set(1.0,0.55,2.2); belly.position.y=-0.44; f.add(belly);
-  var head=new T.Mesh(new T.SphereGeometry(0.95,20,16),bm); head.scale.set(1.0,0.96,1.0); head.position.z=1.4; f.add(head);
-  var tail=new T.Group(); var tf=new T.Mesh(new T.ConeGeometry(1.5,1.7,3),bm); tf.rotation.x=-Math.PI/2; tf.rotation.z=Math.PI; tf.scale.set(1.3,1,0.18); tail.add(tf); tail.position.set(0,0.15,-2.5); f.add(tail); f.userData.tail=tail;
-  var fl=new T.Mesh(new T.ConeGeometry(0.72,1.2,3),bm); fl.rotation.set(0,0.4,Math.PI/2.1); fl.scale.set(1,1,0.3); fl.position.set(-1.15,-0.35,0.5); f.add(fl);
-  var fr=fl.clone(); fr.rotation.set(0,-0.4,-Math.PI/2.1); fr.position.x=1.15; f.add(fr);
-  f.add(eye(-0.85,0.36,1.7,0.24)); f.add(eye(0.85,0.36,1.7,0.24));
-  f.userData.whale=true;
-  return f;
-}
-// shark (threat) — sleek grey with a tall signature dorsal fin
-function makeShark(){
-  var f=new T.Group();
-  var bm=new T.MeshStandardMaterial({color:0x8792a3,roughness:.5});
-  var bel=new T.MeshStandardMaterial({color:0xd8dfe8,roughness:.5});
-  var body=new T.Mesh(new T.SphereGeometry(1,22,16),bm); body.scale.set(0.6,0.72,2.0); f.add(body);
-  var belly=new T.Mesh(new T.SphereGeometry(0.97,16,12),bel); belly.scale.set(0.5,0.42,1.75); belly.position.y=-0.3; f.add(belly);
-  var snout=new T.Mesh(new T.SphereGeometry(0.62,16,12),bm); snout.scale.set(0.85,0.8,1.1); snout.position.z=1.55; f.add(snout);
-  var dor=new T.Mesh(new T.ConeGeometry(0.55,1.5,3),bm); dor.scale.set(0.24,1,1.0); dor.rotation.x=-0.15; dor.position.set(0,0.82,-0.1); f.add(dor);
-  var tail=new T.Group(); var tf=new T.Mesh(new T.ConeGeometry(0.6,1.6,3),bm); tf.scale.set(0.22,1,1); tf.position.set(0,0.2,0); tail.add(tf); tail.position.set(0,0.1,-2.1); f.add(tail); f.userData.tail=tail;
-  var pL=new T.Mesh(new T.ConeGeometry(0.42,1.0,3),bm); pL.rotation.set(0.2,0.4,Math.PI/2); pL.scale.set(1,1,0.18); pL.position.set(-0.6,-0.25,0.5); f.add(pL);
-  var pR=pL.clone(); pR.rotation.set(0.2,-0.4,-Math.PI/2); pR.position.x=0.6; f.add(pR);
-  f.add(eye(-0.32,0.22,1.35,0.15)); f.add(eye(0.32,0.22,1.35,0.15));
-  f.userData.shark=true;
-  return f;
-}
+/* ---------- creatures: realistic CGI billboard sprites ---------- */
+renderer.outputEncoding=T.sRGBEncoding;
+var DIR='/game/creatures/';
+var TEX={}, TEXKEYS=['player_salmonad','r_sardine','r_reef','r_clown','r_mackerel','r_shark','r_dolphin','r_whale'];
+var FOOD_TEX=['r_sardine','r_reef','r_clown','r_mackerel'];
+var _loaded=0, _loader=new T.TextureLoader();
+TEXKEYS.forEach(function(k){_loader.load(DIR+k+'.png',function(t){t.encoding=T.sRGBEncoding;TEX[k]=t;if(++_loaded===TEXKEYS.length)assetsReady();},undefined,function(){if(++_loaded===TEXKEYS.length)assetsReady();});});
+function assetsReady(){var b=el('playBtn');if(b){b.disabled=false;b.textContent='Dive in';} if(TEX['player_salmonad']){player.material.map=TEX['player_salmonad'];player.material.needsUpdate=true;}}
+function sprite(key){return new T.Sprite(new T.SpriteMaterial({map:TEX[key]||null,transparent:true,fog:true,depthWrite:false}));}
+function makeSalmonad(){return sprite('player_salmonad');}
+function makeFish(){return sprite(FOOD_TEX[(Math.random()*FOOD_TEX.length)|0]);}
+function makeShark(){var s=sprite('r_shark');s.userData.shark=true;return s;}
+function makeWhale(){var s=sprite(Math.random()<0.45?'r_dolphin':'r_whale');s.userData.whale=true;return s;}
 // fishing hook (hazard): line from the surface + hook + glowing bait
 function makeHook(){
   var g=new T.Group();
@@ -349,7 +291,7 @@ function spawnNpc(far){
   } else { // WHALE — big roamer, absolute floor so you always see giants
     kind='whale'; f=makeWhale(); m=Math.max(mass*1.4, 16+Math.random()*48); size=Math.cbrt(m)*1.28;
   }
-  f.scale.setScalar(size);
+  f.scale.set(size*2.4,size*2.4,1);
   var big=(kind!=='fish');
   var dir=new T.Vector3(Math.random()-.5,(Math.random()-.5)*0.5,Math.random()-.5).normalize();
   var dist=(far?70:35)+Math.random()*(big?95:60);
@@ -411,10 +353,12 @@ function pop(pos,color,n){
 
 /* ---------- loop ---------- */
 var clock=new T.Clock();
+var camRight=new T.Vector3(), _cu=new T.Vector3(), _cf=new T.Vector3();
 function frame(){
   requestAnimationFrame(frame);
   var dt=Math.min(clock.getDelta(),0.05);
   motes.rotation.y+=dt*0.01;
+  camera.matrixWorld.extractBasis(camRight,_cu,_cf);
   for(var ks=0;ks<kelps.length;ks++){kelps[ks].rotation.z=Math.sin(clock.elapsedTime*0.6+kelps[ks].userData.ph)*0.12;}
   // depth color grade
   var depthT=Math.max(0,Math.min(1,(-player.position.y+10)/70));
@@ -481,19 +425,19 @@ function frame(){
       targYaw += (Math.atan2(Math.sin(toC-yaw),Math.cos(toC-yaw)))*dt*1.5;
     }
 
-    // orient player
-    player.scale.setScalar(playerScale());
-    var look=player.position.clone().add(dir);
-    player.lookAt(look);
-    // tail wiggle
-    if(player.userData.tail) player.userData.tail.rotation.y=Math.sin(gameTime*(dashing?18:9))*0.4;
+    // orient player sprite (billboard; flip to face travel direction)
+    var pv=playerRadius()*2.4;
+    var pFace=(dir.dot(camRight)>=0)?1:-1;
+    player.scale.set(pv*pFace,pv,1);
+    var bob=Math.sin(gameTime*(dashing?9:5))*0.06*pv; player.scale.y=pv+bob;
 
-    // camera: dorsal 3/4 chase (behind & above so you see the fish)
-    var back=dir.clone().multiplyScalar(-(8.5+playerRadius()*3.0));
-    var camTarget=player.position.clone().add(back); camTarget.y+=5.5+playerRadius()*2.2;
-    camera.position.lerp(camTarget,Math.min(1,dt*4));
-    camera.lookAt(player.position.x, player.position.y-0.6, player.position.z+dir.z*3);
-    camera.fov += ((dashing?70:62)-camera.fov)*Math.min(1,dt*5); camera.updateProjectionMatrix();
+    // camera: stable follow (mostly world-fixed angle so billboards read)
+    var lean=dir.clone().setY(0); if(lean.lengthSq()>0.001)lean.normalize(); else lean.set(0,0,1);
+    var back=new T.Vector3(0,0,1).lerp(lean.clone().multiplyScalar(-1),0.3).normalize();
+    var camTarget=player.position.clone().addScaledVector(back,15+pv*0.7); camTarget.y+=6+pv*0.5;
+    camera.position.lerp(camTarget,Math.min(1,dt*3.2));
+    camera.lookAt(player.position.x, player.position.y+1, player.position.z);
+    camera.fov += ((dashing?66:60)-camera.fov)*Math.min(1,dt*5); camera.updateProjectionMatrix();
 
     // maintain population
     while(npcs.length<MAXN) spawnNpc(true);
@@ -537,10 +481,9 @@ function frame(){
       o.mesh.position.addScaledVector(o.vel,dt);
       if(Math.random()<0.01){o.vel.x+=(Math.random()-.5);o.vel.z+=(Math.random()-.5);o.vel.clampLength(1,5);}
       o.mesh.position.y=Math.max(-64,Math.min(28,o.mesh.position.y));
-      // face motion
-      var mv=o.vel.clone().normalize();
-      o.mesh.lookAt(o.mesh.position.clone().add(mv));
-      if(o.mesh.userData.tail)o.mesh.userData.tail.rotation.y=Math.sin(o.wig*8)*0.4;
+      // billboard: flip to face travel direction + gentle bob
+      var face=(o.vel.dot(camRight)>=0)?1:-1; var vv=o.size*2.4;
+      o.mesh.scale.set(vv*face, vv+Math.sin(o.wig*3)*0.05*vv, 1);
       // flee only once you're a mid-size fish (early game stays easy)
       var d=o.mesh.position.distanceTo(player.position);
       if(o.mass<mass*0.9 && d<pr+o.size+9 && mass>14){
@@ -584,7 +527,7 @@ function frame(){
     camera.position.y=4+Math.sin(clock.elapsedTime*0.4)*1.5;
     camera.lookAt(0,0,0);
     player.rotation.y=clock.elapsedTime*0.5;
-    player.scale.setScalar(2.2);
+    player.scale.set(7,7,1);
   }
 
   // particles
