@@ -5,7 +5,7 @@ The purple salmon of Monad — the OG by timestamp. Community site, sticker pack
 **Live:** https://salmonad.vercel.app (→ salmonad.net)
 **Token:** [$SALMONAD on nad.fun](https://nad.fun/tokens/0x0a917fCC0799E43d0232780aA359aA0D389d7777)
 `CA: 0x0a917fCC0799E43d0232780aA359aA0D389d7777`
-**Socials:** [X](https://x.com/Salmonads) · [Telegram](https://t.me/salmonads) · admin@salmonad.net
+**Socials:** [X](https://x.com/salmonadog) · [Telegram](https://t.me/salmonads) · admin@salmonad.net
 
 ---
 
